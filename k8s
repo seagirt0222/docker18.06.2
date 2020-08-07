@@ -1,0 +1,47 @@
+sudo timedatectl set-timezone Asia/Taipei
+
+apt-get install -y ntpdate
+
+ntpdate -u ntp.api.bz
+
+swapoff -a && sysctl -w vm.swappiness=0
+
+sed '/swap.img/d' -i /etc/fstab
+
+apt install selinux-utils
+
+setenforce 0
+
+apt-get update
+
+apt-get install apt-transport-https ca-certificates curl software-properties-common -y
+
+curl -fsSL https://download.docker.com/linux/ubuntu/gpg | apt-key add -
+
+add-apt-repository \
+    "deb [arch=amd64] https://download.docker.com/linux/ubuntu \
+    $(lsb_release -cs) \
+    stable"
+
+## Install docker ce.
+apt-get update
+# 指定版本, v18.06.2
+apt-get install docker-ce=18.06.2~ce~3-0~ubuntu -y
+
+## Log 的大小, Storage Driver
+cat > /etc/docker/daemon.json <<EOF
+{
+  "exec-opts": ["native.cgroupdriver=systemd"],
+  "log-driver": "json-file",
+  "log-opts": {
+    "max-size": "100m"
+  },
+  "storage-driver": "overlay2"
+}
+EOF
+
+mkdir -p /etc/systemd/system/docker.service.d
+
+# Restart docker.
+systemctl daemon-reload
+systemctl restart docker
