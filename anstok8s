@@ -1,0 +1,32 @@
+# vim keepalived.sh
+#!/bin/bash
+#時區設定
+sudo timedatectl set-timezone Asia/Taipei
+
+apt-get install -y ntpdate
+
+ntpdate -u ntp.api.bz
+
+#swap 禁用
+swapoff -a && sysctl -w vm.swappiness=0
+
+sed '/swap.img/d' -i /etc/fstab
+
+#禁用Selinux
+apt install selinux-utils
+
+setenforce 0
+
+#安裝Python
+sudo apt install software-properties-common
+
+sudo add-apt-repository ppa:deadsnakes/ppa
+
+sudo apt install python -y
+
+#安裝ansible
+sudo apt-get install -y software-properties-common git cowsay
+
+sudo apt-add-repository -y ppa:ansible/ansible
+
+sudo apt-get update && sudo apt-get install -y ansible
